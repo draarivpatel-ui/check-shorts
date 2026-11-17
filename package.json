@@ -19,9 +19,6 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
-  "dependencies": {
-    "gerber-to-svg": "github:MustafaMulla29/tracespace#45121a9d8af5f398e2b09285692fb70d9849be0b"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tscircuit/check-shorts.git"
@@ -54,6 +51,7 @@
     "circuit-to-svg": "^0.0.390",
     "fast-png": "^8.0.0",
     "format-si-unit": "^0.0.7",
+    "gerber-to-svg": "^4.2.8",
     "polygon-clipping": "^0.15.7",
     "react": "^19.2.7",
     "tscircuit": "^0.0.2044",
@@ -71,6 +69,7 @@
     "circuit-to-canvas": "*",
     "circuit-to-svg": "*",
     "fast-png": "^8.0.0",
+    "gerber-to-svg": "*",
     "react": "^19.2.7",
     "transformation-matrix": "^2.16.1",
     "typescript": "^5"
