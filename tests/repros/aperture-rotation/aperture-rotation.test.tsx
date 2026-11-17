@@ -40,13 +40,16 @@ test("snapshot the same rotated copper through PCB and Gerber rendering", async 
 for (const scenario of cases) {
   // Executed expected failures: remove .failing in the stacked fix. These
   // assertions describe correct behavior, rather than blessing the defect.
-  test.failing(`Gerber ${scenario.name}: detects ${scenario.expected} shorts`, async () => {
-    const circuitJson = await boardWithVia(scenario.x, scenario.y);
-    const shorts = await findBitmapShorts(circuitJson, {
-      mode: "gerber",
-      layer: "top",
-      pixelsPerMm: 100,
-    });
-    expect(shorts).toHaveLength(scenario.expected);
-  });
+  test.failing(
+    `Gerber ${scenario.name}: detects ${scenario.expected} shorts`,
+    async () => {
+      const circuitJson = await boardWithVia(scenario.x, scenario.y);
+      const shorts = await findBitmapShorts(circuitJson, {
+        mode: "gerber",
+        layer: "top",
+        pixelsPerMm: 100,
+      });
+      expect(shorts).toHaveLength(scenario.expected);
+    },
+  );
 }
