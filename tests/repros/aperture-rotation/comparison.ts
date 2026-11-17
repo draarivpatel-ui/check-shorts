@@ -65,14 +65,14 @@ export function comparisonPng(
         ? [
             "VCC pad touches GND via.",
             "PCB detects the contact.",
-            "Gerber misses the short.",
-            "The diagonal pad becomes",
-            "horizontal during rendering.",
+            "Gerber detects it too.",
+            "The exported pad preserves",
+            "its diagonal orientation.",
           ]
         : [
             "GND via is clear of VCC.",
             "PCB reports no shorts.",
-            "Gerber invents a contact.",
+            "Gerber reports none too.",
             "Same nets and components;",
             "only the via escape moves.",
           ];
@@ -82,7 +82,7 @@ export function comparisonPng(
   });
   return renderSvgToPng(`<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1350">
     <rect width="100%" height="100%" fill="#f7f9fc"/>
-    ${label("Rotated IC: missed short and false alarm", 20, 14, 25)}
+    ${label("Rotated IC: correct short detection", 20, 14, 25)}
     ${label("Representative 20 x 16 mm board, not the customer's board", 20, 52, 17)}
     ${label("PCB layout - U1, C1, R1, D1, J1", 20, 88, 18)}
     ${label("Gerber checker - same board, case A", 520, 88, 18)}

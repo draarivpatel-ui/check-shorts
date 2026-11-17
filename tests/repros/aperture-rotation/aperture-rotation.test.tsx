@@ -21,14 +21,16 @@ test("snapshot a routed board with a rotated IC beside a GND escape via", async 
       mode: "gerber",
     });
     expect(pcb.shorts).toHaveLength(scenario.expected);
+    expect(gerber.shorts).toHaveLength(scenario.expected);
     if (scenario.name === "contact") {
       expect(pcb.shorts[0]!.firstOwnerLabels).toContain("U1.pin16");
       expect(pcb.shorts[0]!.secondOwnerLabels).toContain("C1.pin2");
     }
     expect(circuitJson.filter((e) => e.type === "pcb_trace")).toHaveLength(6);
     expect(circuitJson.filter((e) => e.type === "pcb_via")).toHaveLength(2);
-    // Prove rotation survives export. The failure is after this boundary.
-    expect(getGerberLayerString(circuitJson, "top")).toContain("%LR45*%");
+    // The released exporter encodes rotation in the aperture coordinates,
+    // which the stock renderer can read without support for LR commands.
+    expect(getGerberLayerString(circuitJson, "top")).not.toContain("%LR");
     rows.push({ circuitJson, scenario, pcb, gerber });
   }
   await writeOrCompareBinarySnapshot(
@@ -39,18 +41,13 @@ test("snapshot a routed board with a rotated IC beside a GND escape via", async 
 });
 
 for (const scenario of cases) {
-  // These assertions describe correct behavior. Remove .failing once the
-  // dependency renders the exported LR commands correctly.
-  test.failing(
-    `Gerber ${scenario.name}: detects ${scenario.expected} VCC-GND shorts`,
-    async () => {
-      const circuitJson = await controllerBoard(scenario);
-      const shorts = await findBitmapShorts(circuitJson, {
-        mode: "gerber",
-        layer: "top",
-        pixelsPerMm: 100,
-      });
-      expect(shorts).toHaveLength(scenario.expected);
-    },
-  );
+  test(`Gerber ${scenario.name}: detects ${scenario.expected} VCC-GND shorts`, async () => {
+    const circuitJson = await controllerBoard(scenario);
+    const shorts = await findBitmapShorts(circuitJson, {
+      mode: "gerber",
+      layer: "top",
+      pixelsPerMm: 100,
+    });
+    expect(shorts).toHaveLength(scenario.expected);
+  });
 }
