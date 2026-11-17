@@ -3,13 +3,15 @@ import { getGerberLayerString } from "lib/gerber-layer";
 import { findBitmapShorts, renderBitmapShortDebug } from "lib/index";
 import { writeOrCompareBinarySnapshot } from "tests/fixtures/bitmap-snapshot";
 import { comparisonPng } from "./comparison";
-import { boardWithVia, cases } from "./fixture";
+import { controllerBoard, cases } from "./fixture";
 
-test("snapshot the same rotated copper through PCB and Gerber rendering", async () => {
+// Both renderers receive the entire routed board, with its source connectivity.
+// The close-ups are crops of those renders, not separately drawn test shapes.
+test("snapshot a routed board with a rotated IC beside a GND escape via", async () => {
   const rows = [];
   for (const scenario of cases) {
-    const circuitJson = await boardWithVia(scenario.x, scenario.y);
-    const options = { layer: "top" as const, width: 320, height: 320 };
+    const circuitJson = await controllerBoard(scenario);
+    const options = { layer: "top" as const, pixelsPerMm: 100 };
     const pcb = await renderBitmapShortDebug(circuitJson, {
       ...options,
       mode: "pcb",
@@ -19,16 +21,15 @@ test("snapshot the same rotated copper through PCB and Gerber rendering", async 
       mode: "gerber",
     });
     expect(pcb.shorts).toHaveLength(scenario.expected);
+    if (scenario.name === "contact") {
+      expect(pcb.shorts[0]!.firstOwnerLabels).toContain("U1.pin16");
+      expect(pcb.shorts[0]!.secondOwnerLabels).toContain("C1.pin2");
+    }
+    expect(circuitJson.filter((e) => e.type === "pcb_trace")).toHaveLength(6);
+    expect(circuitJson.filter((e) => e.type === "pcb_via")).toHaveLength(2);
     // Prove rotation survives export. The failure is after this boundary.
     expect(getGerberLayerString(circuitJson, "top")).toContain("%LR45*%");
-    rows.push({
-      title:
-        scenario.name === "contact"
-          ? "A. Via on the diagonal pad - must report 1 short"
-          : "B. Via beside the diagonal pad - must report 0 shorts",
-      pcb,
-      gerber,
-    });
+    rows.push({ circuitJson, scenario, pcb, gerber });
   }
   await writeOrCompareBinarySnapshot(
     import.meta.path,
@@ -38,12 +39,12 @@ test("snapshot the same rotated copper through PCB and Gerber rendering", async 
 });
 
 for (const scenario of cases) {
-  // Executed expected failures: remove .failing in the stacked fix. These
-  // assertions describe correct behavior, rather than blessing the defect.
+  // These assertions describe correct behavior. Remove .failing once the
+  // dependency renders the exported LR commands correctly.
   test.failing(
-    `Gerber ${scenario.name}: detects ${scenario.expected} shorts`,
+    `Gerber ${scenario.name}: detects ${scenario.expected} VCC-GND shorts`,
     async () => {
-      const circuitJson = await boardWithVia(scenario.x, scenario.y);
+      const circuitJson = await controllerBoard(scenario);
       const shorts = await findBitmapShorts(circuitJson, {
         mode: "gerber",
         layer: "top",
