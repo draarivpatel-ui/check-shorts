@@ -35,12 +35,6 @@ test("renders a same-net copper pour touch with its source trace filtered out", 
         element.display_name === ".TP_SHORT > .pin1 to net.GND"
       ),
   );
-  // Remove both source representations of the intended connection.
-  for (const element of filteredCircuitJson) {
-    if (element.type === "source_port") {
-      delete element.subcircuit_connectivity_map_key;
-    }
-  }
 
   expect(filteredCircuitJson.length).toBe(circuitJson.length - 1);
   expect(

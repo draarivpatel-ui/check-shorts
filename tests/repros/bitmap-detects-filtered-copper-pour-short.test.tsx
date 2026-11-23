@@ -50,12 +50,6 @@ test("bitmap coloring detects filtered-source-trace copper pour short", async ()
         element.display_name === ".TP_SHORT > .pin1 to net.GND"
       ),
   );
-  // Remove both source representations of the intended connection.
-  for (const element of filteredCircuitJson) {
-    if (element.type === "source_port") {
-      delete element.subcircuit_connectivity_map_key;
-    }
-  }
   const pcbShorts = await writeOrCompareBitmapSnapshot(
     import.meta.path,
     "pcb-bitmap",
