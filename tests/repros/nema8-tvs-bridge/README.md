@@ -4,7 +4,8 @@ The literal
 [`ShiboSoftwareDev/nema8-20mm-dual-usbc-stepper-controller`](https://tscircuit.com/ShiboSoftwareDev/nema8-20mm-dual-usbc-stepper-controller)
 v1.0.48 board has a bottom-copper VM trace that ends on `D_VM_TVS.pin2`,
 which belongs to GND. The published board therefore has a physical VM-to-GND
-bridge, but both PCB and Gerber modes currently return zero shorts.
+bridge. With the released connectivity map both PCB and Gerber modes return
+zero shorts; the corrected map makes the existing checker detect the bridge.
 
 ## Run
 
@@ -39,7 +40,7 @@ does not reproduce the same connectivity-map behavior.
 | Endpoint intended net | `CONTROLLER_PCB_connectivity_net33` (GND) |
 | Copper layer | bottom |
 
-The full connectivity map trusts `end_pcb_port_id` and consequently merges the
-VM and GND identifiers. The checker now uses each copper element's source
-connectivity key as its intended net when that metadata is available, while
-retaining the full-connectivity fallback for elements without source metadata.
+The old full connectivity map trusts `end_pcb_port_id` and consequently merges
+the VM and GND identifiers. The pinned fix in
+[circuit-json-to-connectivity-map#70](https://github.com/tscircuit/circuit-json-to-connectivity-map/pull/70)
+preserves the intended source nets. No checker implementation changes are needed.

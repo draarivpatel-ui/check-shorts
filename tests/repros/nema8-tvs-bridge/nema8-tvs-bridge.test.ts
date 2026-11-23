@@ -22,7 +22,7 @@ test("fixture is the byte-for-byte published v1.0.48 Circuit JSON", () => {
   expect(getNema8Controller()).toHaveLength(2469);
 });
 
-test("VM route metadata ends on the TVS GND port and merges the intended nets", () => {
+test("the map keeps intended nets separate despite the VM route ending on GND", () => {
   const circuitJson = getNema8Controller();
   const db = cju(circuitJson);
   const trace = db.pcb_trace
@@ -61,7 +61,7 @@ test("VM route metadata ends on the TVS GND port and merges the intended nets", 
       VM_SOURCE_TRACE_ID,
       TVS_GROUND_SOURCE_PORT_ID,
     ),
-  ).toBe(true);
+  ).toBe(false);
 });
 
 test.each(["pcb", "gerber"] as const)(
