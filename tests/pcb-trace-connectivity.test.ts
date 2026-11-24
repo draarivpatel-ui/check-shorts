@@ -4,6 +4,18 @@ import { findBitmapShorts } from "../lib";
 
 const circuitJson = [
   {
+    type: "source_net",
+    source_net_id: "gnd",
+    name: "GND",
+    member_source_group_ids: [],
+  },
+  {
+    type: "source_trace",
+    source_trace_id: "gnd_trace",
+    connected_source_port_ids: [],
+    connected_source_net_ids: ["gnd"],
+  },
+  {
     type: "pcb_via",
     pcb_via_id: "via_gnd",
     source_net_id: "gnd",
@@ -19,6 +31,7 @@ const circuitJson = [
   {
     type: "pcb_trace",
     pcb_trace_id: "bottom_trace",
+    source_trace_id: "gnd_trace",
     route: [
       {
         route_type: "wire",
@@ -36,17 +49,16 @@ const circuitJson = [
 for (const mode of ["pcb", "gerber"] as const) {
   const options = { mode, layer: "bottom", pixelsPerMm: 50 } as const;
 
-  test(`${mode}: trace without a source ID connects through its via port`, async () => {
+  test(`${mode}: a declared GND trace shares its via's intended net`, async () => {
     expect(await findBitmapShorts(circuitJson, options)).toEqual([]);
   });
 
-  test(`${mode}: overlapping unidentified trace still reports a short`, async () => {
+  test(`${mode}: a via endpoint cannot supply a trace's missing source owner`, async () => {
     const unidentified = structuredClone(circuitJson);
-    const trace = unidentified.find((element) => element.type === "pcb_trace")!;
-    if (trace.type !== "pcb_trace") throw new Error("Missing trace");
-    const start = trace.route[0];
-    if (start.route_type !== "wire") throw new Error("Missing wire point");
-    delete start.start_pcb_port_id;
+    const trace = unidentified.filter(
+      (element) => element.type === "pcb_trace",
+    )[0];
+    delete trace.source_trace_id;
     expect(
       (await findBitmapShorts(unidentified, options)).length,
     ).toBeGreaterThan(0);
